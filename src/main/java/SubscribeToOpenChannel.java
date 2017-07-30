@@ -22,7 +22,7 @@ public class SubscribeToOpenChannel {
     //static SnapshotToP b = new SnapshotToP("thread 2");
     static int events1=0;
     static int events2=0;
-    static int filename=0;
+    static long filename=0;
     static StringBuilder mytmpstr=new StringBuilder();
     public static void main(String[] args) throws InterruptedException {
         Scanner scanner=new Scanner(System.in);
@@ -42,6 +42,7 @@ public class SubscribeToOpenChannel {
                 for (AnyJson json : data.getMessages()) {
                     if(System.currentTimeMillis()-firstT>=600000)
                     {
+                        filename=System.currentTimeMillis();
                         Fclass fc=new Fclass();
                         buffer1.add(fc);
                         firstT=System.currentTimeMillis();
@@ -65,7 +66,6 @@ public class SubscribeToOpenChannel {
             threadName = name;
             System.out.println("Creating " + threadName);
         }
-
         public void run() {
             System.out.println("Running " + threadName);
             try {
@@ -79,9 +79,7 @@ public class SubscribeToOpenChannel {
                         FileWriter writer= null;
                         try {
                             String tm=String.format("/home/hosseinkh/Desktop/logs/%d",filename);
-                            System.out.println(tm);
                             writer = new FileWriter(new File(tm));
-                            filename++;
                             writer.write(mytmpstr.toString());
                             writer.flush();
                             mytmpstr=new StringBuilder();
@@ -109,55 +107,7 @@ public class SubscribeToOpenChannel {
             if (t == null) {
                 t = new Thread(this, threadName);
                 t.start();
-
             }
         }
     }
-
-//    static class SnapshotToP implements Runnable {
-//        private Thread t;
-//        private String threadName;
-//
-//        SnapshotToP(String name) {
-//            threadName = name;
-//            System.out.println("Creating " + threadName);
-//        }
-//
-//        public void run() {
-//            System.out.println("Running " + threadName);
-//            try {
-//                while (true) {
-//                    if(buffer2.isEmpty())
-//                    {
-//                        continue;
-//                    }
-//                    try{
-//                        FileWriter writer=new FileWriter(new File("/home/hosseinkh/Desktop/1.txt"));
-//                        String tmp=buffer2.take();
-//                        writer.write(tmp).flush();
-//                        writer.close();
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                        System.out.println("can not open or write file!");
-//                    }
-//                }
-//            } catch (InterruptedException e) {
-//                System.out.println("Thread " + threadName + " interrupted.");
-//            }
-//            System.out.println(threadName + " exiting.");
-//        }
-//
-//        public Thread getT() {
-//            return t;
-//        }
-//        public void start() {
-//            System.out.println("Starting " + threadName);
-//            if (t == null) {
-//                t = new Thread(this, threadName);
-//                t.start();
-//
-//            }
-//        }
-//    }
-
 }
