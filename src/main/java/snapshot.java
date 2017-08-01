@@ -6,7 +6,7 @@ public class snapshot{
 
     @Override
     public String toString() {
-        return  time + " " + type + " " + actor.id + " " + repo.id;
+        return  time + " " + actor.id + " " + repo.id;
     }
 
 }

@@ -54,6 +54,11 @@ public class Main {
             long x,y;
             x=scanner.nextLong();
             y=scanner.nextLong();
+            if(x<0 || y<0)
+            {
+                System.out.println("invalid input");
+                continue;
+            }
             long t1=System.currentTimeMillis();
             if(x>y){
                 long tm=x;
