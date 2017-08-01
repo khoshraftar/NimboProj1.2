@@ -1,5 +1,6 @@
 import com.satori.rtm.*;
 import com.satori.rtm.model.*;
+import com.sun.org.apache.regexp.internal.RE;
 
 import java.io.*;
 import java.util.*;
@@ -23,6 +24,18 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         Map<Long, Integer> DevsMap = new HashMap<Long, Integer>();
         Map<Long, Integer> RepMap = new HashMap<Long, Integer>();
+        final ArrayList<String> eventsMenu[] = new ArrayList[5];
+        eventsMenu[0] = new ArrayList<String>();
+        eventsMenu[0].add("PullRequestEvent");
+        eventsMenu[1] = new ArrayList<String>();
+        eventsMenu[1].add("PushEvent");
+        eventsMenu[2] = new ArrayList<String>();
+        eventsMenu[2].add("pullRequestEvent");eventsMenu[2].add("PushEvent");
+        eventsMenu[3] = new ArrayList<String>();
+        eventsMenu[3].add("WatchEvent");eventsMenu[3].add("IssueCommentEvent");eventsMenu[3].add("CreateEvent");eventsMenu[3].add("DeleteEvent");eventsMenu[3].add("ForkEvent");
+        eventsMenu[3] = new ArrayList<String>();
+        eventsMenu[4] = new ArrayList<String>();
+        eventsMenu[4].add("pullRequestEvent");eventsMenu[4].add("PushEvent");eventsMenu[4].add("WatchEvent");eventsMenu[3].add("IssueCommentEvent");eventsMenu[3].add("CreateEvent");eventsMenu[3].add("DeleteEvent");eventsMenu[3].add("ForkEvent");
         final RtmClient client = new RtmClientBuilder(endpoint, appkey)
                 .setListener(new RtmClientAdapter() {
                     @Override
@@ -50,165 +63,91 @@ public class Main {
         client.createSubscription(channel, SubscriptionMode.SIMPLE, listener);
         client.start();
         a.start();
-        ///////////////// new task  //////////////////////
-        while(true)
-        {
-            long x,y;
-            x=scanner.nextLong();
-            y=scanner.nextLong();
-            if(x<0 || y<0)
-            {
-                System.out.println("invalid input");
+
+        while(true) {
+            int inputType = scanner.nextInt();
+            String mode = scanner.next();
+            boolean devBool = false;
+            boolean repBool = false;
+            if (mode.equals("T")){
+                devBool = true;
+                repBool = true;
+            }
+            if (mode.equals("R")){
+                repBool = true;
+            }
+            if (mode.equals("D")){
+                devBool = true;
+            }
+            String timeUnit = scanner.next();
+            int timeScale = 0;
+            if (timeUnit.equals("H")){
+                timeScale = 1000 * 60 * 60;
+            }
+            if(timeUnit.equals("M"))
+                timeScale = 1000 * 60;
+            if (timeUnit.equals("S"))
+                timeScale = 1000;
+            long x, y;
+            x = scanner.nextLong();
+            y = scanner.nextLong();
+            if (x < 0 || y < 0) {
+                System.out.println("Invalid Input!");
                 continue;
             }
-            long t1=System.currentTimeMillis();
-            if(x>y){
-                long tm=x;
-                x=y;
-                y=tm;
+            long t1 = System.currentTimeMillis();
+            if (x > y) {
+                long tm = x;
+                x = y;
+                y = tm;
             }
-            int NumOfEvents=0;
-            if(x<=10)
-            {
-                Scanner scanner2=new Scanner(mytmpstr.toString());
-                System.out.println(mytmpstr.toString());
-                while(scanner2.hasNext())
-                {
-                   long tmpT=scanner2.nextLong();
-                   long tmpA = scanner2.nextLong();
-                   long tmpR = scanner2.nextLong();
-                   if(tmpT<t1-x*1000*60 && tmpT>t1-y*1000*60) {
-                       NumOfEvents++;
-                       if (DevsMap.containsKey(tmpA)) {
-                           int tmp = DevsMap.get(tmpA) + 1;
-                           DevsMap.put(tmpA, tmp);
-                       } else DevsMap.put(tmpA, 1);
-                       if (RepMap.containsKey(tmpR)) {
-                           int tmp = RepMap.get(tmpR) + 1;
-                           RepMap.put(tmpR, tmp);
-                       } else RepMap.put(tmpR, 1);
-                   }
-                }
-
+            int NumOfEvents = 0;
+            x = x * timeScale;
+            y = y * timeScale;
+            x = t1 - x;
+            y = t1 - y;
+            if (x <= 10 * 60 * 1000) {
+                NumOfEvents = ProcessingData.mapUpdateFromString(DevsMap , RepMap , x ,y , NumOfEvents , mytmpstr , eventsMenu[inputType]);
             }
-            x=x*1000*60;
-            y=y*1000*60;
-            x=t1-x;
-            y=t1-y;
-            File tm=new File("/home/hosseinkh/Desktop/Data");
-            String s[]=tm.list();
-            for(int i=0;i<s.length;i++)
-            {
-                long t=Long.parseLong(s[i]);
-                if(t<x && t>y-600000)
-                {
-                    Scanner scanner1;
-                    File file=new File("/home/hosseinkh/Desktop/Data/"+s[i]);
-                    try {
-                        scanner1=new Scanner(file);
-                        while(scanner1.hasNext())
-                        {
-                           // System.out.println(scanner1.nextLong()+" "+scanner1.nextLong()+" "+scanner1.nextLong());
-                            long tmpTime=scanner1.nextLong();
-                            Long DevId=scanner1.nextLong();
-                            Long RepId=scanner1.nextLong();
-                            if(tmpTime<x && tmpTime>y)
-                            {
-                                NumOfEvents++;
-
-                                if(DevsMap.containsKey(DevId))
-                                {
-                                    int h=DevsMap.get(DevId)+1;
-                                    DevsMap.put(DevId,h);
-                                }
-                                else DevsMap.put(DevId,1);
-
-                                if(RepMap.containsKey(RepId))
-                                {
-                                    int h=RepMap.get(RepId)+1;
-                                    RepMap.put(RepId,h);
-                                }
-                                else RepMap.put(RepId,1);
-                            }
-                        }
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println("found:  "+t);
-                }
-            }
-            int max[] = {0,0,0,0,0,0,0,0,0,0,0};
-            long mid[] = {0,0,0,0,0,0,0,0,0,0,0};
-            if(NumOfEvents==0)
-            {
+            NumOfEvents = ProcessingData.mapUpdate(DevsMap , RepMap , x , y , NumOfEvents , eventsMenu[inputType]);
+            int maxActivity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+            long maxId[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+            if (NumOfEvents == 0) {
                 System.out.println("No Data Found");
                 continue;
             }
-            System.out.println("\nNumbers Of Events in this period:" +NumOfEvents+'\n');
-            System.out.println("in "+DevsMap.size()+" Devlopers :\n");
-            for (Long id : DevsMap.keySet()) {
-                max[10]=DevsMap.get(id);
-                mid[10]=id;
-                for(int i=0;i<11;i++) {
-                    for(int j=0;j<10-i;j++)
-                    {
-                        if(max[j]<max[j+1])
-                        {
-                            int tmp=max[j];
-                            max[j]=max[j+1];
-                            max[j+1]=tmp;
-                            long tm2=mid[j];
-                            mid[j]=mid[j+1];
-                            mid[j+1]=tm2;
-                        }
+            System.out.println("\nNumbers Of Events in this period:" + NumOfEvents + '\n');
+            if (devBool) {
+                System.out.println("in " + DevsMap.size() + " Devlopers :\n");
+                ProcessingData.sort(DevsMap, maxId, maxActivity);
+                try {
+                    PrintWriter writer = new PrintWriter(String.format("/Users/amir/Desktop/NimboProj1/GithubLogs/Dev(%d-%d).txt", x, y), "UTF-8");
+                    writer.println(DevsMap.size() + " Devlopers :\n");
+                    for (int i = 0; i < 10; i++) {
+                        writer.println("id: " + maxId[i] + " events: " + maxActivity[i]);
+                        System.out.println("id: " + maxId[i] + " events: " + maxActivity[i]);
                     }
+                    writer.close();
+                } catch (IOException e) {
+                    System.out.println("can not open or write file!");
                 }
             }
-            try{
-                PrintWriter writer = new PrintWriter(String.format("/home/hosseinkh/Desktop/logs/Dev(%d-%d).txt",x, y), "UTF-8");
-                writer.println(DevsMap.size()+" Devlopers :\n");
-                for(int i=0;i<10;i++)
-                {
-                    writer.println("id: "+mid[i]+" events: "+max[i]);
-                    System.out.println("id: "+mid[i]+" events: "+max[i]);
-                }
-                writer.close();
-            } catch (IOException e) {
-                System.out.println("can not open or write file!");
-            }
-
-            int max2[] = {0,0,0,0,0,0,0,0,0,0,0};
-            long mid2[]={0,0,0,0,0,0,0,0,0,0,0};
-            System.out.println("\nin "+RepMap.size()+" Repositories :\n");
-            for (long id : RepMap.keySet()) {
-                max2[10]= RepMap.get(id);;
-                mid2[10]=id;
-                for(int i=0;i<11;i++) {
-                    for(int j=0;j<10-i;j++)
-                    {
-                        if(max2[j]<max2[j+1])
-                        {
-                            int tmp=max2[j];
-                            max2[j]=max2[j+1];
-                            max2[j+1]=tmp;
-                            long tm2=mid2[j];
-                            mid2[j]=mid2[j+1];
-                            mid2[j+1]=tm2;
-                        }
+            if (repBool) {
+                int maxActivity2[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                long maxId2[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+                System.out.println("\nin " + RepMap.size() + " Repositories :\n");
+                ProcessingData.sort(RepMap, maxId2, maxActivity2);
+                try {
+                    PrintWriter writer = new PrintWriter(String.format("/Users/amir/Desktop/NimboProj1/GithubLogs/Rep(%d-%d)", x, y), "UTF-8");
+                    writer.println("\n" + RepMap.size() + " Repositories :\n");
+                    for (int i = 0; i < 10; i++) {
+                        writer.println("id: " + maxId2[i] + " events: " + maxActivity2[i]);
+                        System.out.println("id: " + maxId2[i] + " events: " + maxActivity2[i]);
                     }
+                    writer.close();
+                } catch (IOException e) {
+                    System.out.println("can not open or write file!");
                 }
-            }
-            try{
-                PrintWriter writer = new PrintWriter(String.format("/home/hosseinkh/Desktop/logs/Rep(%d-%d)",x,y ), "UTF-8");
-                writer.println("\n"+RepMap.size()+" Repositories :\n");
-                for(int i=0;i<10;i++)
-                {
-                    writer.println("id: "+mid2[i]+" events: "+max2[i]);
-                    System.out.println("id: "+mid2[i]+" events: "+max2[i]);
-                }
-                writer.close();
-            } catch (IOException e) {
-                System.out.println("can not open or write file!");
             }
         }
 
@@ -234,7 +173,7 @@ public class Main {
                         System.out.println("#");
                         FileWriter writer = null;
                         try {
-                            String tm = String.format("/home/hosseinkh/Desktop/Data/%d", filename);
+                            String tm = String.format("/Users/amir/Desktop/NimboProj1/Data/%d", filename);
                             writer = new FileWriter(new File(tm));
                             writer.write(mytmpstr.toString());
                             writer.flush();
