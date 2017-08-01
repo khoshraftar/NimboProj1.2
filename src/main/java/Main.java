@@ -12,7 +12,7 @@ public class Main {
     static BlockingQueue<AnyJson> buffer1 = new LinkedBlockingQueue<AnyJson>();
     static int events1 = 0;
     static long filename = 0;
-
+    static StringBuilder mytmpstr = new StringBuilder();
     public static void main(String[] args) throws InterruptedException {
         final String endpoint = "wss://open-data.api.satori.com";
         final String appkey = "783ecdCcb8c5f9E66A56cBFeeeB672C3";
@@ -48,6 +48,7 @@ public class Main {
         client.createSubscription(channel, SubscriptionMode.SIMPLE, listener);
         client.start();
         a.start();
+        ///////////////// new task  //////////////////////
         while(true)
         {
             long x,y;
@@ -58,6 +59,29 @@ public class Main {
                 long tm=x;
                 x=y;
                 y=tm;
+            }
+            int NumOfEvents=0;
+            if(x<=10)
+            {
+                Scanner scanner2=new Scanner(mytmpstr.toString());
+                while(scanner2.hasNext())
+                {
+                   long tmpT=scanner2.nextLong();
+                   long tmpA = scanner2.nextLong();
+                   long tmpR = scanner2.nextLong();
+                   if(tmpT<t1-x*1000*60 && tmpT>t1-y*1000*60) {
+                       NumOfEvents++;
+                       if (DevsMap.containsKey(tmpA)) {
+                           int tmp = DevsMap.get(tmpA) + 1;
+                           DevsMap.put(tmpA, tmp);
+                       } else DevsMap.put(tmpA, 1);
+                       if (RepMap.containsKey(tmpR)) {
+                           int tmp = RepMap.get(tmpR) + 1;
+                           RepMap.put(tmpR, tmp);
+                       } else RepMap.put(tmpR, 1);
+                   }
+                }
+
             }
             x=x*1000*60;
             y=y*1000*60;
@@ -78,9 +102,12 @@ public class Main {
                         {
                            // System.out.println(scanner1.nextLong()+" "+scanner1.nextLong()+" "+scanner1.nextLong());
                             long tmpTime=scanner1.nextLong();
+                            Long DevId=scanner1.nextLong();
+                            Long RepId=scanner1.nextLong();
                             if(tmpTime<x && tmpTime>y)
                             {
-                                Long DevId=scanner1.nextLong();
+                                NumOfEvents++;
+
                                 if(DevsMap.containsKey(DevId))
                                 {
                                     int h=DevsMap.get(DevId)+1;
@@ -88,7 +115,6 @@ public class Main {
                                 }
                                 else DevsMap.put(DevId,1);
 
-                                Long RepId=scanner1.nextLong();
                                 if(RepMap.containsKey(RepId))
                                 {
                                     int h=RepMap.get(RepId)+1;
@@ -105,7 +131,12 @@ public class Main {
             }
             int max[] = {0,0,0,0,0,0,0,0,0,0,0};
             long mid[] = {0,0,0,0,0,0,0,0,0,0,0};
-            System.out.println("\nNumbers Of Events:" +(events1)+'\n');
+            if(NumOfEvents==0)
+            {
+                System.out.println("No Data Found");
+                continue;
+            }
+            System.out.println("\nNumbers Of Events in this period:" +NumOfEvents+'\n');
             System.out.println("in "+DevsMap.size()+" Devlopers :\n");
             for (Long id : DevsMap.keySet()) {
                 max[10]=DevsMap.get(id);
@@ -126,7 +157,7 @@ public class Main {
                 }
             }
             try{
-                PrintWriter writer = new PrintWriter(String.format("/home/hosseinkh/Desktop/logs/Dev%d.txt",System.currentTimeMillis() ), "UTF-8");
+                PrintWriter writer = new PrintWriter(String.format("/home/hosseinkh/Desktop/logs/Dev(%d-%d).txt",x, y), "UTF-8");
                 writer.println(DevsMap.size()+" Devlopers :\n");
                 for(int i=0;i<10;i++)
                 {
@@ -160,7 +191,7 @@ public class Main {
                 }
             }
             try{
-                PrintWriter writer = new PrintWriter(String.format("/home/hosseinkh/Desktop/logs/Rep%d",System.currentTimeMillis() ), "UTF-8");
+                PrintWriter writer = new PrintWriter(String.format("/home/hosseinkh/Desktop/logs/Rep(%d-%d)",x,y ), "UTF-8");
                 writer.println("\n"+RepMap.size()+" Repositories :\n");
                 for(int i=0;i<10;i++)
                 {
@@ -186,7 +217,6 @@ public class Main {
 
         public void run() {
             System.out.println("Running " + threadName);
-            StringBuilder mytmpstr = new StringBuilder();
             try {
                 while (true) {
                     if (buffer1.isEmpty())
