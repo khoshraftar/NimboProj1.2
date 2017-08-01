@@ -24,14 +24,17 @@ public class ProcessingData {
             }
         }
     }
-    static int mapUpdate(Map <Long , Integer> devsMap, Map<Long , Integer> repsMap , long x , long y , int NumOfEvents,ArrayList<String> typeChecker){
-        File tm = new File("/Users/amir/Desktop/NimboProj1/Data");
+    static int mapUpdate(Map <Long , Integer> devsMap, Map<Long , Integer> repsMap , long x , long y
+            , int NumOfEvents,ArrayList<String> typeChecker){
+        File tm = new File("Data");
+        tm.mkdir();
         String s[] = tm.list();
         for (int i = 0; i < s.length; i++) {
             long t = Long.parseLong(s[i]);
+            System.out.println(x + " : " + t + " : " + y);
             if (t < x && t > y - 600000) {
                 Scanner scanner1;
-                File file = new File("/Users/amir/Desktop/NimboProj1/Data/" + s[i]);
+                File file = new File("Data/" + s[i]);
                 try {
                     scanner1 = new Scanner(file);
                     while (scanner1.hasNext()) {

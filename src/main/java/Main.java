@@ -32,10 +32,13 @@ public class Main {
         eventsMenu[2] = new ArrayList<String>();
         eventsMenu[2].add("pullRequestEvent");eventsMenu[2].add("PushEvent");
         eventsMenu[3] = new ArrayList<String>();
-        eventsMenu[3].add("WatchEvent");eventsMenu[3].add("IssueCommentEvent");eventsMenu[3].add("CreateEvent");eventsMenu[3].add("DeleteEvent");eventsMenu[3].add("ForkEvent");
+        eventsMenu[3].add("WatchEvent");eventsMenu[3].add("IssueCommentEvent");
+        eventsMenu[3].add("CreateEvent");eventsMenu[3].add("DeleteEvent");eventsMenu[3].add("ForkEvent");
         eventsMenu[3] = new ArrayList<String>();
         eventsMenu[4] = new ArrayList<String>();
-        eventsMenu[4].add("pullRequestEvent");eventsMenu[4].add("PushEvent");eventsMenu[4].add("WatchEvent");eventsMenu[3].add("IssueCommentEvent");eventsMenu[3].add("CreateEvent");eventsMenu[3].add("DeleteEvent");eventsMenu[3].add("ForkEvent");
+        eventsMenu[4].add("pullRequestEvent");eventsMenu[4].add("PushEvent");eventsMenu[4].add("WatchEvent");
+        eventsMenu[4].add("IssueCommentEvent");eventsMenu[4].add("CreateEvent");
+        eventsMenu[4].add("DeleteEvent");eventsMenu[4].add("ForkEvent");
         final RtmClient client = new RtmClientBuilder(endpoint, appkey)
                 .setListener(new RtmClientAdapter() {
                     @Override
@@ -65,6 +68,11 @@ public class Main {
         a.start();
 
         while(true) {
+            System.out.println("Please enter command in this format:");
+            System.out.println("[Events(by code)] [Output mode] [Time unit] [Period start time] [Period final time]");
+            System.out.println("Events codes: 0 -> Pull 1 -> Push 2-> Pull & Push 3 -> Others 4-> All");
+            System.out.println("Output mode: D -> Devolopers R -> Repositories T -> Both");
+            System.out.println("Time units : H -> Hour M -> Minutes S -> Seconds");
             int inputType = scanner.nextInt();
             String mode = scanner.next();
             boolean devBool = false;
@@ -106,7 +114,8 @@ public class Main {
             y = y * timeScale;
             x = t1 - x;
             y = t1 - y;
-            NumOfEvents = ProcessingData.mapUpdateFromString(DevsMap , RepMap , x ,y , NumOfEvents , mytmpstr , eventsMenu[inputType]);
+            NumOfEvents = ProcessingData.mapUpdateFromString(DevsMap , RepMap , x ,y , NumOfEvents ,
+                    mytmpstr , eventsMenu[inputType]);
             NumOfEvents = ProcessingData.mapUpdate(DevsMap , RepMap , x , y , NumOfEvents , eventsMenu[inputType]);
             int maxActivity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             long maxId[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -119,7 +128,10 @@ public class Main {
                 System.out.println("in " + DevsMap.size() + " Devlopers :\n");
                 ProcessingData.sort(DevsMap, maxId, maxActivity);
                 try {
-                    PrintWriter writer = new PrintWriter(String.format("/Users/amir/Desktop/NimboProj1/GithubLogs/Dev(%d-%d).txt", x, y), "UTF-8");
+                    File tm = new File("GitHubLogs");
+                    tm.mkdir();
+                    PrintWriter writer = new PrintWriter(
+                            String.format("GithubLogs/Dev(%d-%d)", x, y), "UTF-8");
                     writer.println(DevsMap.size() + " Devlopers :\n");
                     for (int i = 0; i < 10; i++) {
                         writer.println("id: " + maxId[i] + " events: " + maxActivity[i]);
@@ -136,7 +148,8 @@ public class Main {
                 System.out.println("\nin " + RepMap.size() + " Repositories :\n");
                 ProcessingData.sort(RepMap, maxId2, maxActivity2);
                 try {
-                    PrintWriter writer = new PrintWriter(String.format("/Users/amir/Desktop/NimboProj1/GithubLogs/Rep(%d-%d)", x, y), "UTF-8");
+                    PrintWriter writer = new PrintWriter(
+                            String.format("GithubLogs/Rep(%d-%d)", x, y), "UTF-8");
                     writer.println("\n" + RepMap.size() + " Repositories :\n");
                     for (int i = 0; i < 10; i++) {
                         writer.println("id: " + maxId2[i] + " events: " + maxActivity2[i]);
@@ -171,7 +184,7 @@ public class Main {
                         System.out.println("#");
                         FileWriter writer = null;
                         try {
-                            String tm = String.format("/Users/amir/Desktop/NimboProj1/Data/%d", filename);
+                            String tm = String.format("Data/%d", filename);
                             writer = new FileWriter(new File(tm));
                             writer.write(mytmpstr.toString());
                             writer.flush();
