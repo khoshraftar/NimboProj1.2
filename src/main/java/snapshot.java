@@ -1,10 +1,12 @@
-public class snapshot {
+public class snapshot{
     String type;
     actor actor;
-    rep repo;
+    repo repo;
     long time;
-    String Tostring(){
-        String str=String.valueOf(time)+" "+actor.id+" "+repo.id;
-        return str;
+
+    @Override
+    public String toString() {
+        return  time + " " + type + " " + actor.id + " " + repo.id;
     }
+
 }

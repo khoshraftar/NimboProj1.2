@@ -6,9 +6,9 @@ import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class SubscribeToOpenChannel {
+public class Main {
 
-    static long firstT = -1;
+    static long firstTime = -1;
     static BlockingQueue<AnyJson> buffer1 = new LinkedBlockingQueue<AnyJson>();
     static int events1 = 0;
     static long filename = 0;
@@ -26,7 +26,7 @@ public class SubscribeToOpenChannel {
                     @Override
                     public void onEnterConnected(RtmClient client) {
                         System.out.println("Connected to Satori RTM!");
-                        firstT = System.currentTimeMillis();
+                        firstTime = System.currentTimeMillis();
                         filename = System.currentTimeMillis();
                     }
                 })
@@ -35,10 +35,10 @@ public class SubscribeToOpenChannel {
             @Override
             public void onSubscriptionData(SubscriptionData data) {
                 for (AnyJson json : data.getMessages()) {
-                    if (System.currentTimeMillis() - firstT >= 600000) {
-                        Fclass fc = new Fclass();
-                        buffer1.add(fc);
-                        firstT = System.currentTimeMillis();
+                    if (System.currentTimeMillis() - firstTime >= 600000) {
+                        Splitter splitter = new Splitter();
+                        buffer1.add(splitter);
+                        firstTime = System.currentTimeMillis();
                     }
                     buffer1.add(json);
                     events1++;
@@ -192,7 +192,7 @@ public class SubscribeToOpenChannel {
                     if (buffer1.isEmpty())
                         continue;
                     AnyJson tmp = buffer1.take();
-                    if (tmp instanceof Fclass) {
+                    if (tmp instanceof Splitter) {
                         System.out.println("#");
                         FileWriter writer = null;
                         try {
@@ -207,9 +207,9 @@ public class SubscribeToOpenChannel {
                         }
                         continue;
                     }
-                    snapshot tmp2 = tmp.convertToType(snapshot.class);
-                    tmp2.time = System.currentTimeMillis();
-                    mytmpstr.append(tmp2.Tostring() + '\n');
+                    snapshot snapshot = tmp.convertToType(snapshot.class);
+                    snapshot.time = System.currentTimeMillis();
+                    mytmpstr.append(snapshot.toString() + '\n');
                 }
             } catch (InterruptedException e) {
                 System.out.println("JsonToSnapshot Interrupted");
