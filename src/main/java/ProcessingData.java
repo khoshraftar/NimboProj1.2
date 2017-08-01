@@ -42,8 +42,6 @@ public class ProcessingData {
                         if(!typeChecker.contains(type))
                             continue;
                         if (tmpTime < x && tmpTime > y) {
-                            System.out.println(x + "fu" + y);
-
                             NumOfEvents++;
 
                             if (devsMap.containsKey(DevId)) {
@@ -76,7 +74,6 @@ public class ProcessingData {
             if (!typeChecker.contains(tmpS))
                 continue;
             if (tmpT < x && tmpT > y) {
-                System.out.println(x + "  " + y);
                 NumOfEvents++;
                 if (devsMap.containsKey(tmpA)) {
                     int tmp = devsMap.get(tmpA) + 1;

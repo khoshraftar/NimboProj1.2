@@ -106,9 +106,7 @@ public class Main {
             y = y * timeScale;
             x = t1 - x;
             y = t1 - y;
-            if (x <= 10 * 60 * 1000) {
-                NumOfEvents = ProcessingData.mapUpdateFromString(DevsMap , RepMap , x ,y , NumOfEvents , mytmpstr , eventsMenu[inputType]);
-            }
+            NumOfEvents = ProcessingData.mapUpdateFromString(DevsMap , RepMap , x ,y , NumOfEvents , mytmpstr , eventsMenu[inputType]);
             NumOfEvents = ProcessingData.mapUpdate(DevsMap , RepMap , x , y , NumOfEvents , eventsMenu[inputType]);
             int maxActivity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             long maxId[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
