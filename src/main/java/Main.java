@@ -13,6 +13,8 @@ public class Main {
     static int events1 = 0;
     static long filename = 0;
     static StringBuilder mytmpstr = new StringBuilder();
+    static Map<Long,String> DevNameMap=new HashMap<Long, String>();
+    static Map<Long,String> RepNameMap=new HashMap<Long, String>();
     public static void main(String[] args) throws InterruptedException {
         final String endpoint = "wss://open-data.api.satori.com";
         final String appkey = "783ecdCcb8c5f9E66A56cBFeeeB672C3";
@@ -69,6 +71,7 @@ public class Main {
             if(x<=10)
             {
                 Scanner scanner2=new Scanner(mytmpstr.toString());
+                System.out.println(mytmpstr.toString());
                 while(scanner2.hasNext())
                 {
                    long tmpT=scanner2.nextLong();
@@ -242,9 +245,11 @@ public class Main {
                         }
                         continue;
                     }
-                    snapshot snapshot = tmp.convertToType(snapshot.class);
-                    snapshot.time = System.currentTimeMillis();
-                    mytmpstr.append(snapshot.toString() + '\n');
+                    snapshot snap = tmp.convertToType(snapshot.class);
+                    snap.time = System.currentTimeMillis();
+                    DevNameMap.put(Long.parseLong(snap.actor.id),snap.actor.login);
+                    RepNameMap.put(Long.parseLong(snap.repo.id),snap.repo.name);
+                    mytmpstr.append(snap.toString() + '\n');
                 }
             } catch (InterruptedException e) {
                 System.out.println("JsonToSnapshot Interrupted");
