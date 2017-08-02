@@ -16,7 +16,7 @@ public class Main {
     static Map<Long,String> DevNameMap=new HashMap<Long, String>();
     static Map<Long,String> RepNameMap=new HashMap<Long, String>();
     public static void main(String[] args) throws InterruptedException {
-        final String endpoint = "wss://open-data.api.satori.com";
+                final String endpoint = "wss://open-data.api.satori.com";
         final String appkey = "783ecdCcb8c5f9E66A56cBFeeeB672C3";
         final String channel = "github-events";
         JsonToSnapshot a = new JsonToSnapshot("thread 1");
@@ -221,6 +221,8 @@ public class Main {
                     if (tmp instanceof Splitter) {
                         System.out.println("#");
                         FileWriter writer = null;
+                        File file=new File("Data");
+                        file.mkdir();
                         try {
                             String tm = String.format("Data/%d", filename);
                             writer = new FileWriter(new File(tm));

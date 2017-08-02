@@ -25,3 +25,11 @@ NimboProj1.2.iml
 .idea/misc.xml
 .idea/modules.xml
 .idea/vcs.xml
+
+# Data And Logs Files
+Logs
+Data
+# target and resources
+src/main/resources/
+src/test/
+target/
