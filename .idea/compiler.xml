@@ -6,11 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="NimboProj1.2" />
+        <module name="com.Nimbo" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="NimboProj1.2" target="1.5" />
+      <module name="com.Nimbo" target="1.5" />
     </bytecodeTargetLevel>
   </component>
 </project>

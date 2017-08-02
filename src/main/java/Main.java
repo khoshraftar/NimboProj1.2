@@ -8,7 +8,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Main {
-
     static long firstTime = -1;
     static BlockingQueue<AnyJson> buffer1 = new LinkedBlockingQueue<AnyJson>();
     static int events1 = 0;
@@ -21,7 +20,6 @@ public class Main {
         final String appkey = "783ecdCcb8c5f9E66A56cBFeeeB672C3";
         final String channel = "github-events";
         JsonToSnapshot a = new JsonToSnapshot("thread 1");
-        Scanner scanner = new Scanner(System.in);
         Map<Long, Integer> DevsMap = new HashMap<Long, Integer>();
         Map<Long, Integer> RepMap = new HashMap<Long, Integer>();
         final ArrayList<String> eventsMenu[] = new ArrayList[5];
@@ -32,13 +30,13 @@ public class Main {
         eventsMenu[2] = new ArrayList<String>();
         eventsMenu[2].add("pullRequestEvent");eventsMenu[2].add("PushEvent");
         eventsMenu[3] = new ArrayList<String>();
-        eventsMenu[3].add("WatchEvent");eventsMenu[3].add("IssueCommentEvent");
-        eventsMenu[3].add("CreateEvent");eventsMenu[3].add("DeleteEvent");eventsMenu[3].add("ForkEvent");
+        eventsMenu[3].add("WatchEvent");eventsMenu[3].add("IssueCommentEvent");eventsMenu[3].add("CreateEvent");
+        eventsMenu[3].add("DeleteEvent");eventsMenu[3].add("ForkEvent");
         eventsMenu[3] = new ArrayList<String>();
         eventsMenu[4] = new ArrayList<String>();
         eventsMenu[4].add("pullRequestEvent");eventsMenu[4].add("PushEvent");eventsMenu[4].add("WatchEvent");
-        eventsMenu[4].add("IssueCommentEvent");eventsMenu[4].add("CreateEvent");
-        eventsMenu[4].add("DeleteEvent");eventsMenu[4].add("ForkEvent");
+        eventsMenu[4].add("IssueCommentEvent");eventsMenu[4].add("CreateEvent");eventsMenu[4].add("DeleteEvent");
+        eventsMenu[4].add("ForkEvent");
         final RtmClient client = new RtmClientBuilder(endpoint, appkey)
                 .setListener(new RtmClientAdapter() {
                     @Override
@@ -53,7 +51,7 @@ public class Main {
             @Override
             public void onSubscriptionData(SubscriptionData data) {
                 for (AnyJson json : data.getMessages()) {
-                    if (System.currentTimeMillis() - firstTime >= 600000) {
+                    if (System.currentTimeMillis() - firstTime >= 180000) {
                         Splitter splitter = new Splitter();
                         buffer1.add(splitter);
                         firstTime = System.currentTimeMillis();
@@ -68,37 +66,71 @@ public class Main {
         a.start();
 
         while(true) {
-            System.out.println("Please enter command in this format:");
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("\nPlease enter command in this format:");
             System.out.println("[Events(by code)] [Output mode] [Time unit] [Period start time] [Period final time]");
             System.out.println("Events codes: 0 -> Pull 1 -> Push 2-> Pull & Push 3 -> Others 4-> All");
             System.out.println("Output mode: D -> Devolopers R -> Repositories T -> Both");
             System.out.println("Time units : H -> Hour M -> Minutes S -> Seconds");
-            int inputType = scanner.nextInt();
-            String mode = scanner.next();
+            System.out.println("example: 2 R H 0 1  :: push & pull of Repositories in one hour\n");
+            int inputType;
+            try{
+                inputType=scanner.nextInt();
+                if (inputType < 0 || inputType > 4)
+                    throw new InputMismatchException();
+            }catch (InputMismatchException e){
+                System.out.println("Invalid Input!");
+                continue;
+            }
+            String mode ;
+            try {
+                mode=scanner.next();
+            }catch (InputMismatchException e) {
+                System.out.println("Invalid input");
+                continue;
+            }
             boolean devBool = false;
             boolean repBool = false;
             if (mode.equals("T")){
                 devBool = true;
                 repBool = true;
             }
-            if (mode.equals("R")){
+            else if (mode.equals("R")){
                 repBool = true;
             }
-            if (mode.equals("D")){
+            else if (mode.equals("D")){
                 devBool = true;
             }
-            String timeUnit = scanner.next();
+            else{
+                System.out.println("Invalid Input!");
+            }
+            String timeUnit ;
+            try{
+                timeUnit=scanner.next();
+            }catch (InputMismatchException e)
+            {
+                System.out.println("Invalid Input!");
+                continue;
+            }
             int timeScale = 0;
             if (timeUnit.equals("H")){
                 timeScale = 1000 * 60 * 60;
             }
-            if(timeUnit.equals("M"))
+            else if(timeUnit.equals("M"))
                 timeScale = 1000 * 60;
-            if (timeUnit.equals("S"))
+            else if (timeUnit.equals("S"))
                 timeScale = 1000;
+            else
+                System.out.println("Invalid Input!");
             long x, y;
-            x = scanner.nextLong();
-            y = scanner.nextLong();
+            try {
+                x = scanner.nextLong();
+                y = scanner.nextLong();
+            }catch (InputMismatchException e)
+            {
+                System.out.println("invalid input");
+                continue;
+            }
             if (x < 0 || y < 0) {
                 System.out.println("Invalid Input!");
                 continue;
@@ -114,9 +146,10 @@ public class Main {
             y = y * timeScale;
             x = t1 - x;
             y = t1 - y;
-            NumOfEvents = ProcessingData.mapUpdateFromString(DevsMap , RepMap , x ,y , NumOfEvents ,
-                    mytmpstr , eventsMenu[inputType]);
-            NumOfEvents = ProcessingData.mapUpdate(DevsMap , RepMap , x , y , NumOfEvents , eventsMenu[inputType]);
+            NumOfEvents = ProcessingData.mapUpdateFromString(DevsMap , RepMap , x ,y , NumOfEvents , mytmpstr ,
+                    eventsMenu[inputType], DevNameMap , RepNameMap);
+            NumOfEvents = ProcessingData.mapUpdate(DevsMap , RepMap , x , y , NumOfEvents , eventsMenu[inputType],
+                    DevNameMap , RepNameMap);
             int maxActivity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             long maxId[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             if (NumOfEvents == 0) {
@@ -128,14 +161,13 @@ public class Main {
                 System.out.println("in " + DevsMap.size() + " Devlopers :\n");
                 ProcessingData.sort(DevsMap, maxId, maxActivity);
                 try {
-                    File tm = new File("GitHubLogs");
-                    tm.mkdir();
-                    PrintWriter writer = new PrintWriter(
-                            String.format("GithubLogs/Dev(%d-%d)", x, y), "UTF-8");
+                    File file=new File("GitHubLogs");
+                    file.mkdir();
+                    PrintWriter writer = new PrintWriter(String.format("GitHubLogs/Dev(%d-%d)", x, y), "UTF-8");
                     writer.println(DevsMap.size() + " Devlopers :\n");
                     for (int i = 0; i < 10; i++) {
-                        writer.println("id: " + maxId[i] + " events: " + maxActivity[i]);
-                        System.out.println("id: " + maxId[i] + " events: " + maxActivity[i]);
+                        writer.println("id: " + maxId[i] +"  name: "+ DevNameMap.get(maxId[i])+"  events: " + maxActivity[i]);
+                        System.out.println("id: " + maxId[i] +"  name: "+ DevNameMap.get(maxId[i])+ "  events: " + maxActivity[i]);
                     }
                     writer.close();
                 } catch (IOException e) {
@@ -148,12 +180,11 @@ public class Main {
                 System.out.println("\nin " + RepMap.size() + " Repositories :\n");
                 ProcessingData.sort(RepMap, maxId2, maxActivity2);
                 try {
-                    PrintWriter writer = new PrintWriter(
-                            String.format("GithubLogs/Rep(%d-%d)", x, y), "UTF-8");
+                    PrintWriter writer = new PrintWriter(String.format("GitHubLogs/Rep(%d-%d)", x, y), "UTF-8");
                     writer.println("\n" + RepMap.size() + " Repositories :\n");
                     for (int i = 0; i < 10; i++) {
-                        writer.println("id: " + maxId2[i] + " events: " + maxActivity2[i]);
-                        System.out.println("id: " + maxId2[i] + " events: " + maxActivity2[i]);
+                        writer.println("id: " + maxId2[i] +"  name: "+ RepNameMap.get(maxId2[i])+ "  events: " + maxActivity2[i] );
+                        System.out.println("id: " + maxId2[i] + "  name: "+ RepNameMap.get(maxId2[i])+"  events: " + maxActivity2[i]);
                     }
                     writer.close();
                 } catch (IOException e) {
@@ -163,7 +194,6 @@ public class Main {
         }
 
     }
-
     static class JsonToSnapshot implements Runnable {
         private Thread t;
         private String threadName;
@@ -196,9 +226,7 @@ public class Main {
                         continue;
                     }
                     snapshot snap = tmp.convertToType(snapshot.class);
-                    snap.time = System.currentTimeMillis();
-                    DevNameMap.put(Long.parseLong(snap.actor.id),snap.actor.login);
-                    RepNameMap.put(Long.parseLong(snap.repo.id),snap.repo.name);
+                    snap.setTime(System.currentTimeMillis());
                     mytmpstr.append(snap.toString() + '\n');
                 }
             } catch (InterruptedException e) {

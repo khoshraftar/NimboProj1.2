@@ -24,15 +24,16 @@ public class ProcessingData {
             }
         }
     }
-    static int mapUpdate(Map <Long , Integer> devsMap, Map<Long , Integer> repsMap , long x , long y
-            , int NumOfEvents,ArrayList<String> typeChecker){
+    static int mapUpdate(Map <Long , Integer> devsMap, Map<Long , Integer> repsMap , long x , long y ,
+                         int NumOfEvents,ArrayList<String> typeChecker,Map<Long, String> DevsNameMap, Map<Long,
+                         String> RepNameMap){
         File tm = new File("Data");
-        tm.mkdir();
+        if(tm.length()==0)
+            return NumOfEvents;
         String s[] = tm.list();
         for (int i = 0; i < s.length; i++) {
             long t = Long.parseLong(s[i]);
-            System.out.println(x + " : " + t + " : " + y);
-            if (t < x && t > y - 600000) {
+            if (t < x && t > y - 180000) {
                 Scanner scanner1;
                 File file = new File("Data/" + s[i]);
                 try {
@@ -42,11 +43,14 @@ public class ProcessingData {
                         String type =scanner1.next();
                         Long DevId = scanner1.nextLong();
                         Long RepId = scanner1.nextLong();
+                        String DevName=scanner1.next();
+                        String RepName=scanner1.next();
                         if(!typeChecker.contains(type))
                             continue;
                         if (tmpTime < x && tmpTime > y) {
                             NumOfEvents++;
-
+                            DevsNameMap.put(DevId,DevName);
+                            RepNameMap.put(RepId,RepName);
                             if (devsMap.containsKey(DevId)) {
                                 int h = devsMap.get(DevId) + 1;
                                 devsMap.put(DevId, h);
@@ -67,17 +71,25 @@ public class ProcessingData {
         return NumOfEvents;
     }
     static int mapUpdateFromString(Map <Long , Integer> devsMap, Map<Long , Integer> repsMap , long x , long y ,
-                                    int NumOfEvents , final StringBuilder mytmpstr , ArrayList<String> typeChecker) {
+                                   int NumOfEvents , final StringBuilder mytmpstr , ArrayList<String> typeChecker,
+                                   Map<Long, String> DevsNameMap, Map<Long, String> RepNameMap) {
         Scanner scanner2 = new Scanner(mytmpstr.toString());
         while (scanner2.hasNext()) {
-            long tmpT = scanner2.nextLong();
-            String tmpS = scanner2.next();
+            long tmpTime = scanner2.nextLong();
+            String tmpType = scanner2.next();
             long tmpA = scanner2.nextLong();
             long tmpR = scanner2.nextLong();
-            if (!typeChecker.contains(tmpS))
+            String tmpDevName=scanner2.next();
+            String tmpRepName =scanner2.next();
+            if (!typeChecker.contains(tmpType))
+            {
                 continue;
-            if (tmpT < x && tmpT > y) {
+            }
+
+            if (tmpTime < x && tmpTime > y) {
                 NumOfEvents++;
+                DevsNameMap.put(tmpA,tmpDevName);
+                RepNameMap.put(tmpR,tmpRepName);
                 if (devsMap.containsKey(tmpA)) {
                     int tmp = devsMap.get(tmpA) + 1;
                     devsMap.put(tmpA, tmp);
