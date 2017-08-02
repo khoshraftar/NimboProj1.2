@@ -33,6 +33,8 @@ Time units : H -> Hour M -> Minutes S -> Seconds
 
 ### example:
 
-````
-2 R H 0 1  :: push & pull of Repositories in one hour ago
-````
+```
+2 R H 0 1
+```
+
+It means push & pull events of Repositories in one hour ago.
