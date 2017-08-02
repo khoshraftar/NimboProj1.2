@@ -30,13 +30,11 @@ public class Main {
         eventsMenu[2] = new ArrayList<String>();
         eventsMenu[2].add("pullRequestEvent");eventsMenu[2].add("PushEvent");
         eventsMenu[3] = new ArrayList<String>();
-        eventsMenu[3].add("WatchEvent");eventsMenu[3].add("IssueCommentEvent");eventsMenu[3].add("CreateEvent");
-        eventsMenu[3].add("DeleteEvent");eventsMenu[3].add("ForkEvent");
+        eventsMenu[3].add("WatchEvent");eventsMenu[3].add("IssueCommentEvent");eventsMenu[3].add("CreateEvent");eventsMenu[3].add("DeleteEvent");eventsMenu[3].add("ForkEvent");
         eventsMenu[3] = new ArrayList<String>();
         eventsMenu[4] = new ArrayList<String>();
-        eventsMenu[4].add("pullRequestEvent");eventsMenu[4].add("PushEvent");eventsMenu[4].add("WatchEvent");
-        eventsMenu[4].add("IssueCommentEvent");eventsMenu[4].add("CreateEvent");eventsMenu[4].add("DeleteEvent");
-        eventsMenu[4].add("ForkEvent");
+        eventsMenu[4].add("pullRequestEvent");eventsMenu[4].add("PushEvent");eventsMenu[4].add("WatchEvent");eventsMenu[4].add("IssueCommentEvent");
+        eventsMenu[3].add("CreateEvent");eventsMenu[4].add("DeleteEvent");eventsMenu[4].add("ForkEvent");
         final RtmClient client = new RtmClientBuilder(endpoint, appkey)
                 .setListener(new RtmClientAdapter() {
                     @Override
@@ -75,16 +73,24 @@ public class Main {
             System.out.println("example: 2 R H 0 1  :: push & pull of Repositories in one hour\n");
             int inputType;
             try{
-                inputType=scanner.nextInt();
-                if (inputType < 0 || inputType > 4)
-                    throw new InputMismatchException();
+                    inputType=scanner.nextInt();
+                    if(inputType>4 || inputType<0)
+                    {
+                        System.out.println("invalid input Noob!");
+                        continue;
+                    }
             }catch (InputMismatchException e){
-                System.out.println("Invalid Input!");
+                System.out.println("invalid input Noob!");
+
                 continue;
             }
             String mode ;
             try {
                 mode=scanner.next();
+                if(!mode.equals("T") && !mode.equals("R") && !mode.equals("D")) {
+                    System.out.println("Invalid input");
+                    continue;
+                }
             }catch (InputMismatchException e) {
                 System.out.println("Invalid input");
                 continue;
@@ -95,33 +101,33 @@ public class Main {
                 devBool = true;
                 repBool = true;
             }
-            else if (mode.equals("R")){
+            if (mode.equals("R")){
                 repBool = true;
             }
-            else if (mode.equals("D")){
+            if (mode.equals("D")){
                 devBool = true;
-            }
-            else{
-                System.out.println("Invalid Input!");
             }
             String timeUnit ;
             try{
                 timeUnit=scanner.next();
+                if(!timeUnit.equals("H") && !timeUnit.equals("M") && !timeUnit.equals("S"))
+                {
+                    System.out.println("inavlid input");
+                    continue;
+                }
             }catch (InputMismatchException e)
             {
-                System.out.println("Invalid Input!");
+                System.out.println("invalid input");
                 continue;
             }
             int timeScale = 0;
             if (timeUnit.equals("H")){
                 timeScale = 1000 * 60 * 60;
             }
-            else if(timeUnit.equals("M"))
+            if(timeUnit.equals("M"))
                 timeScale = 1000 * 60;
-            else if (timeUnit.equals("S"))
+            if (timeUnit.equals("S"))
                 timeScale = 1000;
-            else
-                System.out.println("Invalid Input!");
             long x, y;
             try {
                 x = scanner.nextLong();
@@ -146,10 +152,8 @@ public class Main {
             y = y * timeScale;
             x = t1 - x;
             y = t1 - y;
-            NumOfEvents = ProcessingData.mapUpdateFromString(DevsMap , RepMap , x ,y , NumOfEvents , mytmpstr ,
-                    eventsMenu[inputType], DevNameMap , RepNameMap);
-            NumOfEvents = ProcessingData.mapUpdate(DevsMap , RepMap , x , y , NumOfEvents , eventsMenu[inputType],
-                    DevNameMap , RepNameMap);
+            NumOfEvents = ProcessingData.mapUpdateFromString(DevsMap , RepMap , x ,y , NumOfEvents , mytmpstr , eventsMenu[inputType],DevNameMap,RepNameMap);
+            NumOfEvents = ProcessingData.mapUpdate(DevsMap , RepMap , x , y , NumOfEvents , eventsMenu[inputType],DevNameMap,RepNameMap);
             int maxActivity[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             long maxId[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
             if (NumOfEvents == 0) {
@@ -161,9 +165,9 @@ public class Main {
                 System.out.println("in " + DevsMap.size() + " Devlopers :\n");
                 ProcessingData.sort(DevsMap, maxId, maxActivity);
                 try {
-                    File file=new File("GitHubLogs");
+                    File file=new File("Logs");
                     file.mkdir();
-                    PrintWriter writer = new PrintWriter(String.format("GitHubLogs/Dev(%d-%d)", x, y), "UTF-8");
+                    PrintWriter writer = new PrintWriter(String.format("Logs/Dev(%d-%d)", x, y), "UTF-8");
                     writer.println(DevsMap.size() + " Devlopers :\n");
                     for (int i = 0; i < 10; i++) {
                         writer.println("id: " + maxId[i] +"  name: "+ DevNameMap.get(maxId[i])+"  events: " + maxActivity[i]);
@@ -180,7 +184,7 @@ public class Main {
                 System.out.println("\nin " + RepMap.size() + " Repositories :\n");
                 ProcessingData.sort(RepMap, maxId2, maxActivity2);
                 try {
-                    PrintWriter writer = new PrintWriter(String.format("GitHubLogs/Rep(%d-%d)", x, y), "UTF-8");
+                    PrintWriter writer = new PrintWriter(String.format("Logs/Rep(%d-%d)", x, y), "UTF-8");
                     writer.println("\n" + RepMap.size() + " Repositories :\n");
                     for (int i = 0; i < 10; i++) {
                         writer.println("id: " + maxId2[i] +"  name: "+ RepNameMap.get(maxId2[i])+ "  events: " + maxActivity2[i] );
@@ -191,6 +195,10 @@ public class Main {
                     System.out.println("can not open or write file!");
                 }
             }
+            DevsMap.clear();
+            RepMap.clear();
+            DevNameMap.clear();
+            RepNameMap.clear();
         }
 
     }
@@ -230,6 +238,17 @@ public class Main {
                     mytmpstr.append(snap.toString() + '\n');
                 }
             } catch (InterruptedException e) {
+                FileWriter writer = null;
+                try {
+                    String tm = String.format("Data/%d", filename);
+                    writer = new FileWriter(new File(tm));
+                    writer.write(mytmpstr.toString());
+                    writer.flush();
+                    filename=System.currentTimeMillis();
+                    mytmpstr = new StringBuilder();
+                } catch (IOException e2) {
+                    e2.printStackTrace();
+                }
                 System.out.println("JsonToSnapshot Interrupted");
             }
             System.out.println(threadName + " exiting.");
